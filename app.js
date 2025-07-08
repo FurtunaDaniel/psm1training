@@ -2,7 +2,7 @@ class QuizApp {
   constructor(questions) {
     this.questions = questions;
     this.questionsPerPage = 3;
-    this.currentPage = 0;
+    this.currentPage = parseInt(localStorage.getItem("lastPage")) || 0;
     this.selectedOptions = new Map(); // Map of questionIndex -> Set of selected options
     this.answered = new Array(questions.length).fill(false);
 
@@ -39,6 +39,7 @@ class QuizApp {
 
   goToPage(pageNumber) {
     this.currentPage = pageNumber;
+    localStorage.setItem("lastPage", pageNumber);
     this.displayQuestions();
     this.setupPagination();
     this.updateNavigationButtons();
@@ -202,6 +203,7 @@ class QuizApp {
   previousPage() {
     if (this.currentPage > 0) {
       this.currentPage--;
+      localStorage.setItem("lastPage", this.currentPage);
       this.displayQuestions();
       this.setupPagination();
     }
@@ -211,6 +213,7 @@ class QuizApp {
     const totalPages = Math.ceil(this.questions.length / this.questionsPerPage);
     if (this.currentPage < totalPages - 1) {
       this.currentPage++;
+      localStorage.setItem("lastPage", this.currentPage);
       this.displayQuestions();
       this.setupPagination();
     }
@@ -225,11 +228,20 @@ class QuizApp {
 
 // Initialize the app when questions are loaded
 document.addEventListener("DOMContentLoaded", () => {
-  const pass = prompt("Enter the password to access the questions");
-  if (pass !== "I am noob") {
-    alert("Invalid password");
-    return;
+  // Check if password was already validated
+  const isPasswordValidated =
+    localStorage.getItem("passwordValidated") === "true";
+
+  if (!isPasswordValidated) {
+    const pass = prompt("Enter the password to access the questions");
+    if (pass !== "I am noob") {
+      alert("Invalid password");
+      return;
+    }
+    // Store password validation status
+    localStorage.setItem("passwordValidated", "true");
   }
+
   if (typeof questions !== "undefined") {
     new QuizApp(questions);
   } else {
