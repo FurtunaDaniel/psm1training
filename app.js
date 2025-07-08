@@ -6,6 +6,13 @@ class QuizApp {
     this.selectedOptions = new Map(); // Map of questionIndex -> Set of selected options
     this.answered = new Array(questions.length).fill(false);
 
+    // Initialize scores from localStorage or default to 0
+    this.scores = {
+      correct: parseInt(localStorage.getItem("correctAnswers")) || 0,
+      wrong: parseInt(localStorage.getItem("wrongAnswers")) || 0,
+      total: parseInt(localStorage.getItem("totalAnswered")) || 0,
+    };
+
     // DOM Elements
     this.questionsContainer = document.getElementById("questions-container");
     this.prevButton = document.getElementById("prev-btn");
@@ -14,14 +21,50 @@ class QuizApp {
     this.totalQuestionsSpan = document.getElementById("total-questions");
     this.paginationDiv = document.getElementById("pagination");
 
+    // Score Elements
+    this.correctAnswersSpan = document.getElementById("correct-answers");
+    this.wrongAnswersSpan = document.getElementById("wrong-answers");
+    this.totalAnsweredSpan = document.getElementById("total-answered");
+    this.resetScoreButton = document.getElementById("reset-score");
+
     // Event Listeners
     this.prevButton.addEventListener("click", () => this.previousPage());
     this.nextButton.addEventListener("click", () => this.nextPage());
+    this.resetScoreButton.addEventListener("click", () => this.resetScore());
 
     // Initialize
     this.totalQuestionsSpan.textContent = this.questions.length;
+    this.updateScoreDisplay();
     this.setupPagination();
     this.displayQuestions();
+  }
+
+  resetScore() {
+    if (
+      confirm(
+        "Are you sure you want to reset your score? This cannot be undone."
+      )
+    ) {
+      // Reset scores in memory
+      this.scores = {
+        correct: 0,
+        wrong: 0,
+        total: 0,
+      };
+
+      // Reset scores in localStorage
+      localStorage.removeItem("correctAnswers");
+      localStorage.removeItem("wrongAnswers");
+      localStorage.removeItem("totalAnswered");
+
+      // Reset answered questions
+      this.answered = new Array(this.questions.length).fill(false);
+      this.selectedOptions = new Map();
+
+      // Update display
+      this.updateScoreDisplay();
+      this.displayQuestions();
+    }
   }
 
   setupPagination() {
@@ -185,6 +228,28 @@ class QuizApp {
     this.displayQuestions();
   }
 
+  updateScoreDisplay() {
+    this.correctAnswersSpan.textContent = this.scores.correct;
+    this.wrongAnswersSpan.textContent = this.scores.wrong;
+    this.totalAnsweredSpan.textContent = this.scores.total;
+  }
+
+  updateScores(isCorrect) {
+    if (isCorrect) {
+      this.scores.correct++;
+    } else {
+      this.scores.wrong++;
+    }
+    this.scores.total++;
+
+    // Save scores to localStorage
+    localStorage.setItem("correctAnswers", this.scores.correct);
+    localStorage.setItem("wrongAnswers", this.scores.wrong);
+    localStorage.setItem("totalAnswered", this.scores.total);
+
+    this.updateScoreDisplay();
+  }
+
   checkAnswer(questionIndex) {
     const selectedOptions = this.selectedOptions.get(questionIndex);
     if (selectedOptions.size === 0) {
@@ -196,7 +261,22 @@ class QuizApp {
       return;
     }
 
-    this.answered[questionIndex] = true;
+    const question = this.questions[questionIndex];
+    const correctAnswers = Array.isArray(question.correctAnswers)
+      ? question.correctAnswers
+      : [question.correctAnswer];
+
+    const isCorrect =
+      correctAnswers.length === selectedOptions.size &&
+      [...selectedOptions].every((selected) =>
+        correctAnswers.includes(selected)
+      );
+
+    if (!this.answered[questionIndex]) {
+      this.updateScores(isCorrect);
+      this.answered[questionIndex] = true;
+    }
+
     this.displayQuestions();
   }
 

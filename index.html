@@ -27,9 +27,61 @@
         color: var(--text-color);
       }
 
+      .score-panel {
+        position: fixed;
+        left: 20px;
+        top: 20px;
+        width: 250px;
+        z-index: 1000;
+      }
+
+      .score-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .score-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .score-item span:first-child {
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+
+      .score-item span:last-child {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .reset-button {
+        margin-top: 0.5rem;
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+      }
+
+      .reset-button:hover {
+        background-color: #dc2626;
+      }
+
       .container {
         max-width: 1000px;
         margin: 0 auto;
+        margin-left: 300px;
         background-color: white;
         padding: 2rem;
         border-radius: 8px;
@@ -167,6 +219,28 @@
     </style>
   </head>
   <body>
+    <div class="score-panel">
+      <div class="score-container">
+        <div class="score-item">
+          <span>Correct Answers:</span>
+          <span id="correct-answers">0</span>
+        </div>
+        <div class="score-item">
+          <span>Wrong Answers:</span>
+          <span id="wrong-answers">0</span>
+        </div>
+        <div class="score-item">
+          <span>Total Answered:</span>
+          <span id="total-answered">0</span>
+        </div>
+        <button
+          id="reset-score"
+          class="reset-button"
+        >
+          Reset Score
+        </button>
+      </div>
+    </div>
     <div class="container">
       <div class="header">
         <h1>Scrum Master I (PSM I) Practice Tests</h1>
